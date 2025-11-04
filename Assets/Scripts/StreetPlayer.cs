@@ -6,21 +6,17 @@ using UnityEngine.EventSystems;
 public class StreetPlayer : MonoBehaviour
 {
     [Header("References")]
-    [Tooltip("Pivot que rota en X (arriba/abajo). Suele ser el padre de la Main Camera.")]
     public Transform cameraPivot;
-
-    [Tooltip("LayerMask del layer 'Waypoint'")]
     public LayerMask waypointLayer;
 
     [Header("Movement")]
-    [Tooltip("Velocidad de desplazamiento hacia el waypoint")]
     public float moveSpeed = 4f;
-
-    [Tooltip("Velocidad de giro hacia la orientación del waypoint")]
     public float rotateSpeed = 6f;
-
-    [Tooltip("Distancia de parada al llegar al destino")]
     public float stopDistance = 0.03f;
+
+    [Header("Panorama Spheres")]
+    public GameObject[] panoramaSpheres; // Array de 3 esferas
+    public float cameraMoveOffset = 0.3f;
 
     private CharacterController cc;
     private Coroutine movingRoutine;
@@ -30,18 +26,14 @@ public class StreetPlayer : MonoBehaviour
     {
         cc = GetComponent<CharacterController>();
         if (Camera.main == null)
-            Debug.LogWarning("No hay cámara con tag 'MainCamera' en la escena. Camera.main será null.");
+            Debug.LogWarning("No hay cámara con tag 'MainCamera' en la escena.");
     }
 
     void Update()
     {
-        //Disparador de movimiento
         if (!IsPointerOverUI())
         {
-            if (Input.GetMouseButtonDown(0))
-                TrySetDestinationFromCenter();
-
-            if (Input.GetKeyDown(KeyCode.E)) 
+            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.E))
                 TrySetDestinationFromCenter();
         }
 
@@ -49,15 +41,13 @@ public class StreetPlayer : MonoBehaviour
             DebugRayFromCenter();
     }
 
-
-    void TrySetDestinationFromCenter() //Rayo para el destino 
+    void TrySetDestinationFromCenter()
     {
         if (Camera.main == null) return;
 
         Vector3 center = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f);
         Ray ray = Camera.main.ScreenPointToRay(center);
 
-        //Colliders con IsTrigger
         if (Physics.Raycast(ray, out RaycastHit hit, 1000f, waypointLayer, QueryTriggerInteraction.Collide))
         {
             Waypoint wp = hit.collider.GetComponentInParent<Waypoint>();
@@ -71,34 +61,44 @@ public class StreetPlayer : MonoBehaviour
 
     IEnumerator MoveToWaypoint(Waypoint target)
     {
-        //Rotación objetivo: usa el Y del waypoint para orientar al jugador al llegar
         Quaternion targetRot = Quaternion.Euler(0f, target.transform.eulerAngles.y, 0f);
-
-        //Destino a la misma altura del CharacterController
         Vector3 dest = target.transform.position;
         dest.y = transform.position.y;
 
-        //Mover hasta estar dentro de stopDistance
+        Vector3 startCamPos = cameraPivot.localPosition;
+        Vector3 camOffset = new Vector3(0f, 0f, cameraMoveOffset);
+
         while (Vector3.Distance(transform.position, dest) > stopDistance)
         {
-            //Suaviza giro
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotateSpeed * Time.deltaTime);
-
-            //Desplazamiento con CharacterController
             Vector3 dir = (dest - transform.position).normalized;
             cc.Move(dir * moveSpeed * Time.deltaTime);
+
+            cameraPivot.localPosition = Vector3.Lerp(cameraPivot.localPosition, startCamPos + camOffset, 0.05f);
 
             yield return null;
         }
 
-        //Ajuste final
+        // Ajuste final
         transform.position = dest;
         transform.rotation = targetRot;
+        cameraPivot.localPosition = startCamPos;
         current = target;
         movingRoutine = null;
+
+        // Encender la esfera correspondiente al waypoint
+        if (panoramaSpheres != null && panoramaSpheres.Length > 0 && target != null)
+        {
+            int activeIndex = Mathf.Clamp(target.activeSphereIndex, 0, panoramaSpheres.Length - 1);
+
+            for (int i = 0; i < panoramaSpheres.Length; i++)
+            {
+                if (panoramaSpheres[i] != null)
+                    panoramaSpheres[i].SetActive(i == activeIndex);
+            }
+        }
     }
 
-    ///Evita clicks a través de la UI (botones, etc.)
     bool IsPointerOverUI()
     {
         if (EventSystem.current == null) return false;
@@ -112,15 +112,15 @@ public class StreetPlayer : MonoBehaviour
         return false;
     }
 
-    //Depuración
     void DebugRayFromCenter()
     {
-        if (Camera.main == null) { Debug.Log("No MainCamera"); return; }
+        if (Camera.main == null) return;
 
         Vector3 center = new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f);
         Ray ray = Camera.main.ScreenPointToRay(center);
+
         if (Physics.Raycast(ray, out RaycastHit hit, 1000f, waypointLayer, QueryTriggerInteraction.Collide))
-            Debug.Log($"[Ray] Hit: {hit.collider.name} | Layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
+            Debug.Log($"[Ray] Hit: {hit.collider.name}");
         else
             Debug.Log("[Ray] No golpeó ningún Waypoint");
     }

@@ -5,6 +5,10 @@ public class Waypoint : MonoBehaviour
     [Tooltip("Opcional: otros waypoints accesibles desde este punto")]
     public Waypoint[] neighbors;
 
+    [Header("Panorama Sphere")]
+    [Tooltip("Índice de la esfera que se activa al llegar a este waypoint")]
+    public int activeSphereIndex = 0; // 0 = primera esfera, 1 = segunda, 2 = tercera
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.cyan;
