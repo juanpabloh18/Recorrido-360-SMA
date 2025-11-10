@@ -4,5 +4,20 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: "Assets/Scenes/Men\xFA.unity"
+    guid: 55ed68f493e31104c9f9c628d8e9b570
+  - enabled: 1
+    path: Assets/Scenes/Diuza/menu2.unity
+    guid: fa734b366c8147742a4048eea5669fab
+  - enabled: 1
+    path: Assets/Scenes/BoulevarS.unity
+    guid: 242f3d7daa858924db70197ee475de8c
+  - enabled: 1
+    path: Assets/Scenes/San Antonio.unity
+    guid: 4d25f8e937e28f043ac7e5caeee08c69
+  - enabled: 1
+    path: Assets/Scenes/Diuza/Inventario.unity
+    guid: 828feecbe550d934ab4098736a11e0c0
   m_configObjects: {}

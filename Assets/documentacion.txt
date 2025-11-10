@@ -1,0 +1,10 @@
+movimiento en 360 
+cambio de scenas
+integracion de interfaz
+botones y sonidos
+funciones de inventario
+permanencia de la informacion
+inicio de sesion y registro
+objetos coleccionables
+integracion
+informacion y recursos
