@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
@@ -12,7 +12,7 @@ public class LoginUI : MonoBehaviour
     public TMP_InputField inputCorreo;
     public TMP_InputField inputPassword;
 
-    [Header("Bot�n")]
+    [Header("Botón")]
     public Button botonLogin;
 
     [Header("Mensajes")]
@@ -34,21 +34,30 @@ public class LoginUI : MonoBehaviour
 
         if (usuarioManager.IniciarSesion(correo, password))
         {
-            Debug.Log("Inicio de sesi�n exitoso");
+            Debug.Log("Inicio de sesión exitoso");
 
             if (mensajeError != null)
                 mensajeError.gameObject.SetActive(false);
 
-            // Cambiar a la escena inicial
+            // ✅ Recuperar los datos completos del usuario desde UsuarioManager
+            Usuario datos = usuarioManager.ObtenerUsuario(correo);
+
+            // ✅ Guardar esos datos globalmente para usarlos en otras escenas
+            if (UsuarioSesion.instancia != null && datos != null)
+            {
+                UsuarioSesion.instancia.GuardarDatos(datos.nombreCompleto, datos.correo);
+            }
+
+            // Cambiar a la escena del menú principal
             SceneManager.LoadScene("menu2");
         }
         else
         {
-            Debug.Log("Correo o contrase�a incorrectos");
+            Debug.Log("Correo o contraseña incorrectos");
 
             if (mensajeError != null)
             {
-                mensajeError.text = "Correo o contrase�a incorrectos.";
+                mensajeError.text = "Correo o contraseña incorrectos.";
                 mensajeError.gameObject.SetActive(true);
             }
         }

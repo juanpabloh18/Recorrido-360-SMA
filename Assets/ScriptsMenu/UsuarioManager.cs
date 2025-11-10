@@ -52,6 +52,12 @@ public class UsuarioManager : MonoBehaviour
         Debug.Log("Usuarios guardados en: " + filePath);
     }
 
+    public Usuario ObtenerUsuario(string correo)
+    {
+        if (listaUsuarios == null) return null;
+        return listaUsuarios.usuarios.Find(u => u.correo == correo);
+    }
+
     private void CargarUsuarios()
     {
         if (File.Exists(filePath))
